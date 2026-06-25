@@ -291,6 +291,16 @@ export default () => {
       openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
       exchangeRateHostApiKey: process.env.EXCHANGE_RATE_HOST_API_KEY || '',
     },
+
+    // Auth-specific throttle limit (validated via Zod — must be a positive integer)
+    throttleAuth: {
+      limit: parseInt(process.env.THROTTLE_AUTH_LIMIT || '5', 10),
+    },
+
+    // Stellar hot wallet (required only when Stellar payments are enabled)
+    stellar: {
+      hotWalletSecret: process.env.STELLAR_HOT_WALLET_SECRET ?? null,
+    },
   };
 };
 
