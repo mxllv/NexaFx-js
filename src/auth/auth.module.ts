@@ -17,6 +17,21 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     AuditModule,
     PassportModule,
     SharedJwtModule,
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const secret = config.get<string>('jwt.secret');
+        if (!secret) {
+          throw new Error('JWT_SECRET is not set — refusing to start without a signing key');
+        }
+        return {
+          secret,
+          signOptions: {
+            expiresIn: `${config.get<number>('jwt.expiry') ?? 3600}s`,
+          },
+        };
+      },
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtAuthGuard, PassportJwtAuthGuard, JwtStrategy],

@@ -328,12 +328,25 @@ export const envSchema = z.object({
   // ============================================
   WALLET_ENCRYPTION_KEY: z
     .string()
-    .min(1, 'WALLET_ENCRYPTION_KEY is required')
-    .refine((val) => hexStringRegex.test(val) && val.length === 64, {
-      message: 'WALLET_ENCRYPTION_KEY must be a 64-character hex string',
-    }),
     .length(64, 'WALLET_ENCRYPTION_KEY must be exactly 64 hex characters')
-    .regex(/^[0-9a-fA-F]{64}$/, 'WALLET_ENCRYPTION_KEY must be a valid hex string'),
+    .regex(
+      /^[0-9a-fA-F]{64}$/,
+      'WALLET_ENCRYPTION_KEY must be a valid 64-character hex string',
+    ),
+
+  // ============================================
+  // Auth Rate Limiting
+  // ============================================
+  THROTTLE_AUTH_LIMIT: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().positive())
+    .default(() => 5),
+
+  // ============================================
+  // Stellar Hot Wallet (optional — required only when Stellar is enabled)
+  // ============================================
+  STELLAR_HOT_WALLET_SECRET: z.string().optional(),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
