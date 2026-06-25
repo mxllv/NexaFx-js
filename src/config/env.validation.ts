@@ -335,6 +335,28 @@ export const envSchema = z.object({
     ),
 
   // ============================================
+  // Swap / FX configuration
+  // ============================================
+  SWAP_SLIPPAGE_PERCENT: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().positive().max(0.1))
+    .default(() => 0.005),
+
+  SWAP_PREVIEW_CACHE_TTL_SECONDS: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().positive())
+    .default(() => 30),
+
+  // ============================================
+  // Scheduled-jobs / distributed locking
+  // ============================================
+  PENDING_TX_TIMEOUT_MINUTES: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().positive())
+    .default(() => 30),
   // KYC document storage
   // ============================================
   KYC_STORAGE_HOST: z.string().optional(),
