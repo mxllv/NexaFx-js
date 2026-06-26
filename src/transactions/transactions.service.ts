@@ -15,6 +15,7 @@ import { AuditService } from '../audit/audit.service';
 import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/users.service';
 import { TransactionLimitService } from './transaction-limit.service';
+import { TermsAcceptanceService } from '../terms/terms-acceptance.service';
 
 export interface TransferDto {
   senderId: string;
@@ -86,9 +87,11 @@ export class TransactionsService {
     private readonly usersService: UsersService,
     private readonly events: EventEmitter2,
     private readonly limitService: TransactionLimitService,
+    private readonly termsService: TermsAcceptanceService,
   ) {}
 
   async transfer(dto: TransferDto): Promise<Transaction> {
+    await this.termsService.ensureAccepted(dto.senderId);
     if (dto.amount <= 0) {
       throw new BadRequestException('Transfer amount must be positive');
     }
@@ -212,6 +215,7 @@ export class TransactionsService {
   // ---------------------------------------------------------------------------
 
   async createDeposit(dto: DepositDto): Promise<Transaction> {
+    await this.termsService.ensureAccepted(dto.userId);
     const fee = this.calculateFee(dto.amount);
     const totalChecked = dto.amount + fee.feeAmount; // #742: fee included in limit check
     await this.limitService.check(dto.userId, totalChecked, dto.currency);
@@ -257,6 +261,7 @@ export class TransactionsService {
   // ---------------------------------------------------------------------------
 
   async createWithdrawal(dto: WithdrawalDto): Promise<Transaction> {
+    await this.termsService.ensureAccepted(dto.userId);
     const fee = this.calculateFee(dto.amount);
     const totalChecked = dto.amount + fee.feeAmount; // #742: fee included in limit check
     await this.limitService.check(dto.userId, totalChecked, dto.currency);
@@ -310,6 +315,7 @@ export class TransactionsService {
   // ---------------------------------------------------------------------------
 
   async createSwap(dto: SwapDto): Promise<Transaction> {
+    await this.termsService.ensureAccepted(dto.userId);
     const fee = this.calculateFee(dto.fromAmount);
     const totalChecked = dto.fromAmount + fee.feeAmount; // #742: fee included in limit check
     await this.limitService.check(dto.userId, totalChecked, dto.fromCurrency);
