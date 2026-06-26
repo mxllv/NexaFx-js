@@ -19,6 +19,10 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
 
   const configService = app.get(ConfigService<Configuration>);
+  const port = configService.get<number>('app.port');
+  if (!port || isNaN(port)) {
+    throw new Error(`Invalid PORT: ${port}`);
+  }
   const jsonLimit = configService.get<number>('limits.json') ?? 10 * 1024 * 1024;
   const urlencodedLimit =
     configService.get<number>('limits.urlencoded') ?? 10 * 1024 * 1024;
